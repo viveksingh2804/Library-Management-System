@@ -1,0 +1,81 @@
+/* HomePage.css */
+
+/* Container adjustments */
+.container {
+  max-width: 1400px; /* bigger to fit 5 cards nicely */
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Book card styling */
+/* Book image */
+.book-card img {
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  width: 100%;
+  height: 250px; /* fixed height */
+  object-fit: contain; /* show entire image without cropping */
+  background-color: #f0f0f0; /* optional, looks nicer for empty space */
+}
+
+
+/* Hover effect */
+.book-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Book image */
+.book-card img {
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+}
+
+/* Book title */
+.book-card h5 {
+  font-weight: 600;
+  margin: 5px 0;
+}
+
+/* Book description */
+.book-card p {
+  margin: 0;
+  flex-grow: 1; /* make description take remaining space */
+}
+
+/* Scroll container styling */
+.d-flex {
+  overflow-x: auto;
+  flex-wrap: nowrap; /* prevent wrapping for horizontal scroll */
+  gap: 16px;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 10px;
+}
+
+/* Responsive: adjust cards on smaller screens */
+@media (max-width: 1200px) {
+  .book-card {
+    flex: 0 0 25%; /* 4 cards per view */
+  }
+}
+
+@media (max-width: 992px) {
+  .book-card {
+    flex: 0 0 33%; /* 3 cards per view */
+  }
+}
+
+@media (max-width: 768px) {
+  .book-card {
+    flex: 0 0 50%; /* 2 cards per view */
+  }
+}
+
+@media (max-width: 480px) {
+  .book-card {
+    flex: 0 0 100%; /* 1 card per view */
+  }
+}
