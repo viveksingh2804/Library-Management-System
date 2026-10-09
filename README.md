@@ -76,8 +76,4 @@ The frontend will run on `http://localhost:3000` and connect to the backend API.
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
----
 
-## Author
-
-**K R Karthik** – [GitHub Profile](https://github.com/krkarthik-dev)
