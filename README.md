@@ -39,8 +39,8 @@ LibraryManagement/
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/krkarthik-dev/LibraryManagement.git
-cd LibraryManagement
+git clone https://github.com/viveksingh2804/Library-Management-System.git
+cd Library-Management-System
 ```
 
 ### 2. Backend (Spring Boot)
