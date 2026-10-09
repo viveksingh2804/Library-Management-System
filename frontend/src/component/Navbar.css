@@ -1,0 +1,228 @@
+/* ===== Modern Library Navbar ===== */
+
+.modern-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+
+  width: 100%;
+  min-height: 82px;
+  padding: 14px 6%;
+
+  background: #ffffff;
+  border-bottom: 1px solid #e9edef;
+  box-shadow: 0 4px 18px rgba(20, 44, 61, 0.04);
+}
+
+/* ===== Library Branding ===== */
+
+.library-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  flex-shrink: 0;
+
+  color: #173446;
+  text-decoration: none;
+
+  transition: opacity 0.2s ease;
+}
+
+.library-brand:hover {
+  color: #173446;
+  opacity: 0.85;
+}
+
+.brand-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 46px;
+  height: 46px;
+
+  border-radius: 12px;
+  background: #eaf1f3;
+
+  font-size: 24px;
+}
+
+.library-brand strong {
+  display: block;
+
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+}
+
+.library-brand small {
+  display: block;
+  margin-top: 4px;
+
+  color: #83939b;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+}
+
+/* ===== Navigation Links ===== */
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+}
+
+.navbar-links a {
+  position: relative;
+
+  padding: 10px 0;
+
+  color: #657680;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+
+  transition: color 0.2s ease;
+}
+
+.navbar-links a::after {
+  position: absolute;
+  bottom: 1px;
+  left: 0;
+
+  width: 0;
+  height: 2px;
+
+  border-radius: 2px;
+  background: #527b8d;
+
+  content: "";
+  transition: width 0.25s ease;
+}
+
+.navbar-links a:hover,
+.navbar-links a.active {
+  color: #173f53;
+}
+
+.navbar-links a:hover::after,
+.navbar-links a.active::after {
+  width: 100%;
+}
+
+/* ===== Add Book Button ===== */
+
+.navbar-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  min-height: 43px;
+  padding: 0 18px;
+
+  border: 1px solid #173446;
+  border-radius: 7px;
+
+  background: #173446;
+  color: #ffffff;
+
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.navbar-cta:hover {
+  transform: translateY(-2px);
+
+  background: #294f62;
+  border-color: #294f62;
+  box-shadow: 0 6px 15px rgba(23, 52, 70, 0.16);
+
+  color: #ffffff;
+}
+
+.navbar-cta span {
+  font-size: 19px;
+  line-height: 1;
+}
+
+/* ===== Tablet ===== */
+
+@media (max-width: 1100px) {
+  .modern-navbar {
+    flex-wrap: wrap;
+    gap: 15px;
+    padding: 15px 4%;
+  }
+
+  .navbar-links {
+    order: 3;
+    justify-content: flex-start;
+
+    width: 100%;
+    gap: 26px;
+
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .navbar-links::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ===== Mobile ===== */
+
+@media (max-width: 520px) {
+  .modern-navbar {
+    min-height: auto;
+    gap: 12px;
+    padding: 14px 16px;
+  }
+
+  .brand-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 21px;
+  }
+
+  .library-brand strong {
+    font-size: 17px;
+  }
+
+  .library-brand small {
+    font-size: 8px;
+    letter-spacing: 1.2px;
+  }
+
+  .navbar-cta {
+    min-height: 38px;
+    padding: 0 11px;
+    font-size: 11px;
+  }
+
+  .navbar-links {
+    gap: 22px;
+  }
+
+  .navbar-links a {
+    font-size: 12px;
+  }
+}

@@ -1,114 +1,248 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "./SearchBook.css";
 
 function SearchBook() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [hasSearched, setHasSearched] = useState(false); // 🆕 Track if search was made
+  const [hasSearched, setHasSearched] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  // 🔍 Handle search
-  const handleSearch = async (e) => {
-    e.preventDefault();
+  async function handleSearch(event) {
+    event.preventDefault();
 
-    if (!query.trim()) {
-      console.warn("⚠️ Empty search query!");
+    const searchTerm = query.trim();
+
+    if (!searchTerm) {
+      setError("Enter a book title, author, category or publisher.");
+      setResults([]);
+      setHasSearched(false);
       return;
     }
 
-    console.log("🔎 Searching for:", query);
     setLoading(true);
-    setHasSearched(true); // ✅ Mark that user performed a search
+    setHasSearched(true);
+    setError("");
 
     try {
-      const res = await fetch(`http://localhost:8081/api/books/search?q=${query}`);
-      console.log("📡 API response status:", res.status);
+      const response = await fetch(
+        `http://localhost:8081/api/books/search?q=${encodeURIComponent(searchTerm)}`
+      );
 
-      if (!res.ok) {
-        const errText = await res.text();
-        console.error("❌ Backend error:", errText);
-        alert("Error fetching books. Check console for details.");
-        return;
+      if (!response.ok) {
+        throw new Error(`Search failed (${response.status}). Please try again.`);
       }
 
-      const data = await res.json();
-      console.log("✅ Books received from backend:", data);
-      setResults(data);
-    } catch (error) {
-      console.error("🔥 Network or fetch error:", error);
-      alert("Failed to connect to backend!");
+      const data = await response.json();
+      setResults(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Book search failed:", err);
+      setResults([]);
+      setError(
+        "Unable to search books. Check that the backend is running and try again."
+      );
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  // 👉 Handle book click
-  const handleBookClick = (id) => {
-    console.log("📘 Navigating to book details page for ID:", id);
+  function handleBookClick(id) {
     navigate(`/books/${id}`);
-  };
+  }
 
   return (
-    <div className="container mt-5">
-      <h2 className="mb-4 text-center">🔍 Search Books</h2>
+    <main className="search-page">
+      <section className="search-hero">
+        <div className="search-hero-content">
+          <span className="search-eyebrow">YOUR NEXT READ IS OUT THERE</span>
 
-      {/* ✅ Search Form */}
-      <form onSubmit={handleSearch} className="d-flex justify-content-center mb-4">
-        <input
-          type="text"
-          className="form-control me-2"
-          style={{ maxWidth: "400px" }}
-          placeholder="Search by title, author, category, or publisher..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-        <button type="submit" className="btn btn-primary">
-          Search
-        </button>
-      </form>
+          <h1>
+            Find your next
+            <br />
+            <span>favourite book.</span>
+          </h1>
 
-      {/* ✅ Loading */}
-      {loading && <p className="text-center">Loading...</p>}
+          <p>
+            Search the collection, discover new authors, and find the
+            perfect book for your next chapter.
+          </p>
 
-      {/* ✅ Results */}
-      {!loading && results.length > 0 && (
-        <div className="table-responsive">
-          <table className="table table-hover align-middle text-center">
-            <thead className="table-primary">
-              <tr>
-                <th>Title</th>
-                <th>Category</th>
-                <th>Author</th>
-                <th>Publisher</th>
-              </tr>
-            </thead>
-            <tbody>
-              {results.map((book) => (
-                <tr
-                  key={book.id}
-                  style={{ cursor: "pointer" }}
-                  onClick={() => handleBookClick(book.id)}
-                >
-                  <td>{book.title}</td>
-                  <td>{book.category?.name || "N/A"}</td>
-                  <td>{book.author?.name || "Unknown"}</td>
-                  <td>{book.publisher?.name || "Unknown"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <form className="modern-search-form" onSubmit={handleSearch}>
+            <span className="modern-search-icon" aria-hidden="true">
+              ⌕
+            </span>
+
+            <input
+              type="search"
+              aria-label="Search library"
+              placeholder="Title, author, category or publisher..."
+              value={query}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setError("");
+              }}
+            />
+
+            <button type="submit" disabled={loading}>
+              {loading ? "Searching..." : "Search"}
+            </button>
+          </form>
+
+          {error && <p className="search-error">{error}</p>}
+
+          <div className="search-hint">
+            <span>✦</span> Every great journey begins with a book.
+          </div>
         </div>
-      )}
 
-      {/* ✅ Show "No results" only AFTER a search */}
-      {!loading && hasSearched && results.length === 0 && (
-        <p className="text-center text-muted">
-          No books found for “{query}”.
-        </p>
-      )}
-    </div>
+        <div className="search-hero-art" aria-hidden="true">
+          <div className="search-art-circle"></div>
+
+          <div className="search-art-book search-art-book-one">
+            <span>THE</span>
+            <strong>WISDOM<br />OF WORDS</strong>
+            <i>✳</i>
+          </div>
+
+          <div className="search-art-book search-art-book-two">
+            <span>A COLLECTION OF</span>
+            <strong>NEW<br />WORLDS</strong>
+            <i>✦</i>
+          </div>
+
+          <div className="search-art-label">OPEN A BOOK. OPEN A WORLD.</div>
+        </div>
+      </section>
+
+      <section className="search-results-section">
+        <div className="search-results-heading">
+          <div>
+            <span className="search-section-eyebrow">
+              {hasSearched ? "YOUR DISCOVERIES" : "EXPLORE THE COLLECTION"}
+            </span>
+
+            <h2>
+              {loading
+                ? "Finding books..."
+                : hasSearched
+                ? "Search results"
+                : "Ready to explore?"}
+            </h2>
+
+            <p>
+              {hasSearched && !loading
+                ? `${results.length} ${
+                    results.length === 1 ? "book" : "books"
+                  } found`
+                : "Enter a search term above to discover books in your library."}
+            </p>
+          </div>
+
+          {hasSearched && !loading && results.length > 0 && (
+            <button
+              className="search-clear-button"
+              onClick={() => {
+                setQuery("");
+                setResults([]);
+                setHasSearched(false);
+                setError("");
+              }}
+            >
+              Clear results
+            </button>
+          )}
+        </div>
+
+        {loading && (
+          <div className="search-empty-state">
+            <div className="search-spinner"></div>
+            <p>Searching the shelves...</p>
+          </div>
+        )}
+
+        {!loading && !error && hasSearched && results.length === 0 && (
+          <div className="search-empty-state">
+            <span className="search-empty-icon">⌕</span>
+            <h3>No books found</h3>
+            <p>
+              We couldn't find anything matching "{query}". Try another
+              title or search term.
+            </p>
+          </div>
+        )}
+
+        {!loading && !hasSearched && !error && (
+          <div className="search-welcome-state">
+            <span>📖</span>
+            <div>
+              <strong>Your next favourite is waiting.</strong>
+              <p>Use the search bar above to explore the library collection.</p>
+            </div>
+          </div>
+        )}
+
+        {!loading && results.length > 0 && (
+          <div className="search-book-grid">
+            {results.map((book) => (
+              <button
+                type="button"
+                className="search-book-card"
+                key={book.id}
+                onClick={() => handleBookClick(book.id)}
+                aria-label={`View details for ${book.title}`}
+              >
+                <div className="search-book-cover">
+                  {book.image ? (
+                    <img
+                      src={`http://localhost:8081${book.image}`}
+                      alt={book.title}
+                      loading="lazy"
+                      onError={(event) => {
+                        event.currentTarget.style.display = "none";
+                      }}
+                    />
+                  ) : (
+                    <div className="search-book-placeholder">
+                      <span>✳</span>
+                      <small>THE LIBRARY EDITION</small>
+                    </div>
+                  )}
+
+                  <span className="search-cover-shelf">
+                    Shelf {book.shelf || "—"}
+                  </span>
+                </div>
+
+                <div className="search-book-info">
+                  <span className="search-book-category">
+                    {book.category?.name || "LIBRARY COLLECTION"}
+                  </span>
+
+                  <h3>{book.title}</h3>
+
+                  <p className="search-book-author">
+                    By {book.author?.name || "Unknown author"}
+                  </p>
+
+                  <div className="search-book-meta">
+                    <span>{book.publisher?.name || "Publisher unavailable"}</span>
+                    <span className="search-book-arrow">↗</span>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <footer className="search-page-footer">
+        <span>📚 Netaji Library</span>
+        <span>A little more knowledge, one book at a time.</span>
+      </footer>
+    </main>
   );
 }
 

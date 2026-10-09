@@ -1,92 +1,281 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import "bootstrap/dist/css/bootstrap.min.css";
+import { Link, useParams } from "react-router-dom";
+import "./BookDetailsPage.css";
+
+const API_URL = "http://localhost:8081";
 
 function BookDetailsPage() {
   const { id } = useParams();
+
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
+    const controller = new AbortController();
+
     async function fetchBook() {
+      setLoading(true);
+      setError("");
+
       try {
-        const res = await fetch(`http://localhost:8081/api/books/${id}`);
-        const data = await res.json();
-        console.log(data);
+        const response = await fetch(
+          `${API_URL}/api/books/${id}`,
+          { signal: controller.signal }
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            response.status === 404
+              ? "This book could not be found."
+              : "Unable to load book details."
+          );
+        }
+
+        const data = await response.json();
         setBook(data);
       } catch (err) {
-        console.error("Failed to fetch book details", err);
+        if (err.name !== "AbortError") {
+          console.error("Failed to fetch book details:", err);
+          setError(err.message || "Something went wrong.");
+        }
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     }
 
     fetchBook();
+
+    return () => controller.abort();
   }, [id]);
 
   if (loading) {
-    return <p className="text-center mt-4">Loading book details...</p>;
+    return (
+      <main className="book-details-page">
+        <div className="details-state">
+          <div className="details-spinner" />
+          <h2>Opening your book...</h2>
+          <p>Gathering all the details for you.</p>
+        </div>
+      </main>
+    );
   }
 
-  if (!book) {
-    return <p className="text-center mt-4 text-danger">Book not found.</p>;
+  if (error || !book) {
+    return (
+      <main className="book-details-page">
+        <div className="details-state error-state">
+          <span className="state-icon">📕</span>
+          <h2>Book not found</h2>
+          <p>{error || "The requested book is unavailable."}</p>
+          <Link to="/search" className="details-primary-button">
+            Browse Books
+          </Link>
+        </div>
+      </main>
+    );
   }
+
+  const isBorrowed = book.status === "BORROWED";
+
+  const authorName =
+    typeof book.author === "object"
+      ? book.author?.name
+      : book.author;
+
+  const publisherName =
+    typeof book.publisher === "object"
+      ? book.publisher?.name
+      : book.publisher;
+
+  const categoryName =
+    typeof book.category === "object"
+      ? book.category?.name
+      : book.category;
 
   return (
-    <div className="container mt-4">
-      <h2 className="text-center mb-4">{book.title}</h2>
-      <div className="row">
-        {/* ✅ Book Image */}
-        <div className="col-md-4 mb-3">
-          {book.image ? (
-            <img
-              src={`http://localhost:8081${book.image}`}
-              alt={book.title}
-              className="img-fluid rounded shadow-sm"
-            />
-          ) : (
-            <div
-              style={{
-                width: "100%",
-                height: "300px",
-                backgroundColor: "#eee",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                borderRadius: "5px",
-                fontSize: "0.9rem",
-                color: "#888",
-              }}
-            >
-              No Image
+    <main className="book-details-page">
+      <div className="details-container">
+
+        {/* Breadcrumb */}
+        <div className="details-breadcrumb">
+          <Link to="/">Home</Link>
+          <span>/</span>
+          <Link to="/search">Browse Books</Link>
+          <span>/</span>
+          <span className="breadcrumb-current">
+            Book Details
+          </span>
+        </div>
+
+        {/* Page heading */}
+        <div className="details-page-heading">
+          <div>
+            <span className="details-eyebrow">
+              THE LIBRARY COLLECTION
+            </span>
+            <h1>Discover your next read.</h1>
+            <p>
+              Explore the story, the author, and everything
+              that makes this book special.
+            </p>
+          </div>
+
+          <Link to="/search" className="details-back-button">
+            ← Back to Books
+          </Link>
+        </div>
+
+        {/* Main book panel */}
+        <section className="book-details-card">
+
+          {/* Cover */}
+          <div className="book-cover-panel">
+            <div className="cover-decoration cover-decoration-one" />
+            <div className="cover-decoration cover-decoration-two" />
+
+            <div className="book-cover-frame">
+              {book.image ? (
+                <img
+                  src={
+                    book.image.startsWith("http")
+                      ? book.image
+                      : `${API_URL}${book.image}`
+                  }
+                  alt={`Cover of ${book.title}`}
+                  className="book-cover-image"
+                />
+              ) : (
+                <div className="book-cover-placeholder">
+                  <span className="placeholder-book-icon">📚</span>
+                  <span className="placeholder-label">
+                    LIBRARY EDITION
+                  </span>
+                  <span className="placeholder-title">
+                    {book.title}
+                  </span>
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
-        {/* ✅ Book Details */}
-        <div className="col-md-8">
-          <h5>Description:</h5>
-          <p>{book.description || "No description available"}</p>
+            <div
+              className={`availability-badge ${
+                isBorrowed ? "badge-borrowed" : "badge-available"
+              }`}
+            >
+              <span className="availability-dot" />
+              {isBorrowed ? "Currently Borrowed" : "Available to Read"}
+            </div>
+          </div>
 
-          <h5>Author:</h5>
-          <p><strong>Name:</strong> {book.author?.name || "Unknown"}</p>
-          <p><strong>Bio:</strong> {book.author?.bio || "No bio available"}</p>
+          {/* Information */}
+          <div className="book-information-panel">
+            <div className="book-information-topline">
+              <span className="book-id-label">
+                BOOK ID: #{book.id}
+              </span>
 
-          <h5>Publisher:</h5>
-          <p><strong>Name:</strong> {book.publisher?.name || "Unknown"}</p>
-          <p><strong>Bio:</strong> {book.publisher?.bio || "No bio available"}</p>
+              {categoryName && (
+                <span className="book-category-tag">
+                  {categoryName}
+                </span>
+              )}
+            </div>
 
-          <h5>Book Details:</h5>
-          <p><strong>Shelf:</strong> {book.shelf || "N/A"}</p>
-          <p>
-            <strong>Status:</strong>{" "}
-            {book.status === "BORROWED"
-              ? `Borrowed by ${book.borrowedBy}`
-              : "Available"}
-          </p>
-        </div>
+            <h2 className="book-detail-title">
+              {book.title}
+            </h2>
+
+            <p className="book-detail-author">
+              Written by{" "}
+              <strong>{authorName || "Unknown Author"}</strong>
+            </p>
+
+            <div className="book-detail-divider" />
+
+            <div className="book-description-section">
+              <h3>About this book</h3>
+              <p>
+                {book.description ||
+                  "No description has been added for this book yet."}
+              </p>
+            </div>
+
+            <div className="book-facts-grid">
+              <div className="book-fact">
+                <span className="fact-icon">👤</span>
+                <div>
+                  <span className="fact-label">AUTHOR</span>
+                  <strong>{authorName || "Not specified"}</strong>
+                </div>
+              </div>
+
+              <div className="book-fact">
+                <span className="fact-icon">🏢</span>
+                <div>
+                  <span className="fact-label">PUBLISHER</span>
+                  <strong>{publisherName || "Not specified"}</strong>
+                </div>
+              </div>
+
+              <div className="book-fact">
+                <span className="fact-icon">📍</span>
+                <div>
+                  <span className="fact-label">SHELF LOCATION</span>
+                  <strong>{book.shelf || "Not assigned"}</strong>
+                </div>
+              </div>
+
+              <div className="book-fact">
+                <span className="fact-icon">📖</span>
+                <div>
+                  <span className="fact-label">CATEGORY</span>
+                  <strong>{categoryName || "Not categorized"}</strong>
+                </div>
+              </div>
+            </div>
+
+            {isBorrowed && book.borrowedBy && (
+              <div className="borrowed-information">
+                <span>👤</span>
+                <div>
+                  <strong>Currently borrowed by</strong>
+                  <p>{book.borrowedBy}</p>
+                </div>
+              </div>
+            )}
+
+            <div className="book-details-actions">
+              <Link to="/search" className="details-primary-button">
+                ← Explore More Books
+              </Link>
+            </div>
+
+            <p className="book-details-note">
+              <span>ℹ</span>
+              For borrowing or returning this book, visit the
+              Borrow &amp; Return section.
+            </p>
+          </div>
+        </section>
+
+        {/* Bottom information */}
+        <section className="library-promise">
+          <div className="promise-icon">✦</div>
+          <div>
+            <h3>A little knowledge goes a long way.</h3>
+            <p>
+              Find a book, discover an idea, and let every page
+              take you somewhere new.
+            </p>
+          </div>
+          <Link to="/book-borrow">Borrow &amp; Return →</Link>
+        </section>
+
       </div>
-    </div>
+    </main>
   );
 }
 
